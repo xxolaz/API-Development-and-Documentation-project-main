@@ -1,0 +1,170 @@
+API Documentation
+Base URL
+The API is hosted at the application's root URL. All endpoints are prefixed with /.
+Example: http://127.0.0.1:5000
+
+Error Handling
+Errors are returned in a consistent JSON format:
+
+JSON
+
+{
+    "success": false,
+    "error": 404,
+    "message": "resource not found"
+}
+The API provides handlers for the following error codes: 400, 404, 422, and 500.
+
+Endpoints
+
+
+GET /categories
+Fetches a dictionary of all available categories.
+Request Arguments: None
+Returns: An object with a categories key containing a dictionary of id: type pairs.
+
+JSON
+
+{
+    "success": true,
+    "categories": {
+        "1": "Science",
+        "2": "Art",
+        "3": "Geography"
+    }
+}
+
+
+GET /questions
+Fetches a paginated list of questions.
+Request Arguments: page (integer, optional, defaults to 1).
+Returns: A list of questions for the given page, the total number of questions, all categories, and the current category (which is null for this view).
+
+JSON
+
+{
+    "success": true,
+    "questions": [
+        {
+            "id": 10,
+            "question": "Which is the only team to play in every soccer World Cup?",
+            "answer": "Brazil",
+            "category": 6,
+            "difficulty": 3
+        }
+    ],
+    "totalQuestions": 19,
+    "categories": { "1": "Science", ... },
+    "currentCategory": null
+}
+
+
+DELETE /questions/<int:question_id>
+Deletes the question with the specified ID.
+Request Arguments: question_id (integer) as part of the URL.
+Returns: A success flag and the ID of the deleted question.
+
+JSON
+
+{
+    "success": true,
+    "deleted": 12
+}
+
+
+POST /questions (Create a new question)
+Creates a new question. The request body must contain question, answer, difficulty, and category.
+
+JSON
+
+{
+    "question": "What is the capital of Pennsylvania?",
+    "answer": "Harrisburg",
+    "difficulty": 2,
+    "category": 3
+}
+
+
+Returns: A success flag and the ID of the newly created question.
+
+JSON
+
+{
+    "success": true,
+    "created": 23
+}
+
+
+POST /questions (Search for questions)
+Searches for questions based on a search term. This is differentiated from the create endpoint by the presence of a searchTerm key in the request body.
+
+JSON
+
+{
+    "searchTerm": "title"
+}
+
+
+Returns: A paginated list of questions that match the search term.
+
+JSON
+
+{
+    "success": true,
+    "questions": [
+        {
+            "id": 2,
+            "question": "What is the title of the 1991 film about an outlaw duo?",
+            "answer": "Thelma & Louise",
+            "category": 5,
+            "difficulty": 3
+        }
+    ],
+    "totalQuestions": 1,
+    "currentCategory": null
+}
+
+
+GET /categories/<int:category_id>/questions
+Fetches all questions belonging to a specific category.
+Request Arguments: category_id (integer) as part of the URL.
+Returns: A list of questions for the category, the total number of questions in that category, and the current category type string.
+
+JSON
+
+{
+    "success": true,
+    "questions": [ ... ],
+    "totalQuestions": 3,
+    "currentCategory": "Science"
+}
+
+
+POST /quizzes
+Fetches a random question to play the quiz. Can be filtered by category. The request body must include the quiz_category and a list of previous_questions to avoid repeats.
+
+JSON
+
+{
+    "previous_questions": [10, 12],
+    "quiz_category": {
+        "id": "1",
+        "type": "Science"
+    }
+}
+
+
+Returns: A single new question object, or null if no questions are left in the category.
+
+JSON
+
+{
+    "success": true,
+    "question": {
+        "id": 11,
+        "question": "What is the heaviest organ in the human body?",
+        "answer": "The Liver",
+        "category": 1,
+        "difficulty": 4
+    }
+}
