@@ -16,7 +16,7 @@ This project is the backend server for a trivia web application. It provides a s
 
 1.  **Clone the Repository**
     ```bash
-    git clone 
+    git clone https://github.com/xxolaz/API-Development-and-Documentation-project-main.git
     cd cd0037-API-Development-and-Documentation-project
     ```
 
