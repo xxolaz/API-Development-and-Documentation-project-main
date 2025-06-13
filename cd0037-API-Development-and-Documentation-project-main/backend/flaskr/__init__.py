@@ -6,6 +6,7 @@ from models import setup_db, Question, Category, db
 
 QUESTIONS_PER_PAGE = 10
 
+
 def paginate_questions(request, selection):
     page = request.args.get('page', 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
@@ -15,6 +16,7 @@ def paginate_questions(request, selection):
     current_questions = questions[start:end]
 
     return current_questions
+
 
 def create_app(test_config=None):
     # create and configure the app
@@ -36,8 +38,12 @@ def create_app(test_config=None):
     """
     @app.after_request
     def after_request(response):
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
-        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        response.headers.add(
+            'Access-Control-Allow-Headers',
+            'Content-Type,Authorization,true')
+        response.headers.add(
+            'Access-Control-Allow-Methods',
+            'GET,PUT,POST,DELETE,OPTIONS')
         return response
 
     """
@@ -45,14 +51,15 @@ def create_app(test_config=None):
     Create an endpoint to handle GET requests
     for all available categories.
     """
-    @app.route('/categories') # /api/categories
+    @app.route('/categories')  # /api/categories
     def get_categories():
         categories = Category.query.order_by(Category.id).all()
-        
+
         if len(categories) == 0:
             formatted_categories = {}
         else:
-            formatted_categories = {category.id: category.type for category in categories}
+            formatted_categories = {
+                category.id: category.type for category in categories}
 
         return jsonify({
             'success': True,
@@ -71,7 +78,7 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     """
-    @app.route('/questions') # /api/questions
+    @app.route('/questions')  # /api/questions
     def get_questions():
         selection = Question.query.order_by(Question.id).all()
         current_questions = paginate_questions(request, selection)
@@ -80,25 +87,27 @@ def create_app(test_config=None):
             abort(404)
 
         categories = Category.query.order_by(Category.id).all()
-        formatted_categories = {category.id: category.type for category in categories}
+        formatted_categories = {
+            category.id: category.type for category in categories}
 
         return jsonify({
             'success': True,
             'questions': current_questions,
             'totalQuestions': len(selection),
             'categories': formatted_categories,
-            'currentCategory': None 
+            'currentCategory': None
         })
-
 
     @app.route('/categories/<int:category_id>/questions')
     def get_questions_by_category(category_id):
-        category = Category.query.filter(Category.id == category_id).one_or_none()
+        category = Category.query.filter(
+            Category.id == category_id).one_or_none()
         if category is None:
             abort(404)
-            
+
         try:
-            selection = Question.query.filter(Question.category == category_id).all()
+            selection = Question.query.filter(
+                Question.category == category_id).all()
             current_questions = paginate_questions(request, selection)
 
             return jsonify({
@@ -107,7 +116,7 @@ def create_app(test_config=None):
                 'totalQuestions': len(selection),
                 'currentCategory': category.type
             })
-        except:
+        except BaseException:
             abort(422)
 
     """
@@ -126,12 +135,12 @@ def create_app(test_config=None):
 
         try:
             question.delete()
-            
             return jsonify({
                 'success': True,
                 'deleted': question_id
             })
-        except:
+        except Exception as e:
+            print(f"Error in delete_question: {e}")
             abort(422)
 
     """
@@ -163,14 +172,15 @@ def create_app(test_config=None):
             abort(400)
 
         search_term = body.get('searchTerm', None)
-        
+
         if search_term is None:
             new_question = body.get('question')
             new_answer = body.get('answer')
             new_difficulty = body.get('difficulty')
             new_category = body.get('category')
-            
-            if not all([new_question, new_answer, new_difficulty, new_category]):
+
+            if not all([new_question, new_answer,
+                       new_difficulty, new_category]):
                 abort(400)
 
         try:
@@ -197,9 +207,9 @@ def create_app(test_config=None):
                     'success': True,
                     'created': question.id,
                 }), 201
-        except:
+        except Exception as e:
+            print(f"Error in create_or_search_questions: {e}")
             abort(422)
-
 
     @app.route('/quizzes', methods=['POST'])
     def play_quiz():
@@ -212,13 +222,18 @@ def create_app(test_config=None):
         quiz_category = body.get('quiz_category')
 
         if previous_questions is None or quiz_category is None:
-            abort(400, description="Request body must contain 'previous_questions' and 'quiz_category'.")
-        
+            abort(
+                400,
+                description="Request body must contain 'previous_questions' and 'quiz_category'.")
+
         try:
-            query = Question.query.filter(Question.id.notin_(previous_questions))
+            query = Question.query.filter(
+                Question.id.notin_(previous_questions))
 
             if quiz_category['id'] != 0:
-                query = query.filter(Question.category_id == str(quiz_category['id']))
+                query = query.filter(
+                    Question.category == str(
+                        quiz_category['id']))
 
             remaining_questions = query.all()
 
@@ -255,7 +270,6 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
-
 
     """
     @TODO:
@@ -296,4 +310,3 @@ def create_app(test_config=None):
         }), 500
 
     return app
-
